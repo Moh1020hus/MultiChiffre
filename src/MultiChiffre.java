@@ -7,17 +7,13 @@ public class MultiChiffre {
     private final char[] buchstaben;
 
     public MultiChiffre() {
-        this.txt = new Txt("C:\\Users\\ckdkcdkccv\\Downloads\\Gedicht.txt", "Gedicht.txt");
+        this.txt = new Txt("C:\\Users\\ckdkcdkccv\\Downloads", "Gedicht.txt");
         this.buchstaben = new char[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
         this.randKey = getRandomKey();
     }
 
     public void setKey(int key) {
         this.key = key;
-    }
-
-    public int getKey() {
-        return key;
     }
 
     private int getRandomKey() {
@@ -27,49 +23,66 @@ public class MultiChiffre {
         return keys[index];
     }
 
+
     public void verschliessen() {
-        StringBuilder verschlueserteTxt = new StringBuilder();
-        int alphabetSize = buchstaben.length;
+         txt.text = new StringBuilder();
+
+        txt.reader();
+        txt.replaceGermanCharacters(1);
+        txt.lowerUpperCase(1);
 
         for (int i = 0; i < txt.getText().length(); i++) {
             char originalChar = txt.getText().charAt(i);
-            int originalIndex = originalChar - 'a'; // Index des Originalbuchstabens im Alphabet
+            int originalIndex = -1;
+            for (int j = 0; j < buchstaben.length; j++) {
+                if (originalChar == buchstaben[j]) {
+                    originalIndex = j;
+                    break;
+                }
+            }
 
-            if (originalIndex >= 0 && originalIndex < alphabetSize) {
-                int encryptedIndex = (originalIndex * key) % alphabetSize; // Berechnung des verschlüsselten Index
-                char encryptedChar = buchstaben[encryptedIndex]; // Verschlüsselter Buchstabe
-                verschlueserteTxt.append(encryptedChar);
+            if (originalIndex >= 0 ) {
+                int encryptedIndex = (originalIndex * key) % 26; // Berechnung des verschlüsselten Index
+                txt.text.append(encryptedIndex);
+                txt.text.append(" ");
+
             } else {
                 // Nicht alphabetische Zeichen bleiben unverschlüsselt
-                verschlueserteTxt.append(originalChar);
+                txt.text.append(originalChar);
             }
         }
 
-        txt.setText(verschlueserteTxt);
+        txt.setText(txt.text);
+        txt.writer(txt.getText());
     }
-    public void randVerschliessen() {
+     public void randVerschliessen() {
         StringBuilder verschlueserteTxt = new StringBuilder();
         int alphabetSize = buchstaben.length;
+        txt.reader();
+        txt.replaceGermanCharacters(1);
+        txt.lowerUpperCase(1);
 
         for (int i = 0; i < txt.getText().length(); i++) {
             char originalChar = txt.getText().charAt(i);
-
-            if (Character.isLetter(originalChar)) {
-                int originalIndex = originalChar - 'a';
-
-                if (originalIndex >= 0 && originalIndex < alphabetSize) {
-                    int encryptedIndex = (originalIndex + randKey) % alphabetSize;
-                    char encryptedChar = buchstaben[encryptedIndex];
-                    verschlueserteTxt.append(encryptedChar);
+            int originalIndex = -1;
+            for (int j = 0; j < buchstaben.length; j++) {
+                if (originalChar == buchstaben[j]) {
+                    originalIndex = j;
+                    break;
                 }
+            }
+
+            if (originalIndex >= 0 ) {
+                int encryptedIndex = (originalIndex + randKey) % alphabetSize;
+                char encryptedChar = buchstaben[encryptedIndex];
+                verschlueserteTxt.append(encryptedChar);
             } else {
                 verschlueserteTxt.append(originalChar);
             }
         }
 
         txt.setText(verschlueserteTxt);
-    }
-    private int modularInverse(int a, int m) {
+    }    private int modularInverse(int a, int m) {
         int m0 = m;
         int y = 0, x = 1;
 
@@ -99,14 +112,15 @@ public class MultiChiffre {
     public void entschliessen() {
         StringBuilder entschlueserteTxt = new StringBuilder();
         int alphabetSize = buchstaben.length;
+        txt.reader();
+        txt.replaceGermanCharacters(-1);
+        txt.lowerUpperCase(-1);
 
         for (int i = 0; i < txt.getText().length(); i++) {
             char encryptedChar = txt.getText().charAt(i);
             int encryptedIndex = -1;
-
-            // Find the index of the encrypted character in the alphabet
-            for (int j = 0; j < alphabetSize; j++) {
-                if (buchstaben[j] == encryptedChar) {
+            for (int j = 0; j < buchstaben.length; j++) {
+                if (encryptedChar == buchstaben[j]) {
                     encryptedIndex = j;
                     break;
                 }
@@ -127,10 +141,12 @@ public class MultiChiffre {
     }
     public void decryptUnknownKey() {
         int[] keys = {3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25};
-        int alphabetSize = buchstaben.length;
+        int g = 26;
+
+        String languageFrequencies = "enisratdhulcgmobwfkzpvyjxq";
 
         // Step 1: Determine the frequency of letters in the ciphertext
-        int[] letterFrequencies = new int[alphabetSize];
+        int[] letterFrequencies = new int[26]; // number of letters
         for (int i = 0; i < txt.getText().length(); i++) {
             char c = txt.getText().charAt(i);
             if (Character.isLetter(c)) {
@@ -152,18 +168,35 @@ public class MultiChiffre {
         // Step 3: Attempt decryption with each possible key
         for (int key : keys) {
             int encryptedIndex = mostFrequentLetter - 'a';
-            int decryptedIndex = (encryptedIndex * modularInverse(key, alphabetSize)) % alphabetSize;
+            int decryptedIndex = (encryptedIndex * modularInverse(key, g)) % g;
             char decryptedChar = buchstaben[decryptedIndex];
 
             // Check if the decrypted character matches the expected most frequent letter in the language
-            if (decryptedChar == 'e') {
+            if (decryptedChar == languageFrequencies.charAt(0)) {
                 setKey(key); // Set the correct key
                 entschliessen(); // Decrypt the ciphertext with the known key
                 return;
             }
         }
-    }
-    public Txt getTxt(){
+
+        // No match found using the most frequent letter in the language
+        // Try again using the next most frequent letter in the language
+        for (int j = 1; j < languageFrequencies.length(); j++) {
+            char expectedMostFrequentLetter = languageFrequencies.charAt(j);
+
+            for (int key : keys) {
+                int encryptedIndex = mostFrequentLetter - 'a';
+                int decryptedIndex = (encryptedIndex * modularInverse(key, g)) % g;
+                char decryptedChar = buchstaben[decryptedIndex];
+
+                if (decryptedChar == expectedMostFrequentLetter) {
+                    setKey(key);
+                    entschliessen();
+                    return;
+                }
+            }
+        }
+    }    public Txt getTxt(){
         return txt;
     }
 

@@ -1,13 +1,11 @@
 import java.io.*;
-import java.util.List;
-
 public class Txt {
     private final File file;
 
-    private StringBuilder text;
+     StringBuilder text;
 
 
-    public Txt( String path, String fileName) {
+    public Txt(String path, String fileName) {
         this.file = new File(path, fileName);
         this.text = new StringBuilder();
 
@@ -18,12 +16,13 @@ public class Txt {
     public void setText(StringBuilder text) {
         this.text = text;
     }
+
     public StringBuilder getText() {
         return text;
     }
 
-    public boolean reader(){
-        try(
+    public boolean reader() {
+        try (
                 BufferedReader buffReader = new BufferedReader(
                         new InputStreamReader(
                                 new BufferedInputStream(
@@ -34,31 +33,32 @@ public class Txt {
         ) {
             String line = buffReader.readLine();
 
-            while ( line != null ){
+            while (line != null) {
                 this.text.append(line);
                 this.text.append("\n");
                 line = buffReader.readLine();
             }
-            this.text.deleteCharAt(this.text.length() - 1 );
+            this.text.deleteCharAt(this.text.length() - 1);
 
-        } catch (FileNotFoundException fnfEx){
+        } catch (FileNotFoundException fnfEx) {
             return false;
-        } catch (IOException ioEx){
+        } catch (IOException ioEx) {
             ioEx.printStackTrace(System.err);
             return false;
         }
         return true;
     }
-    public boolean writer(StringBuilder x){
-        try(
+
+    public boolean writer(StringBuilder x) {
+        try (
                 PrintWriter pw = new PrintWriter(
                         new BufferedWriter(
                                 new FileWriter(this.file)
                         )
                 )
-        ){
-            while (x.length() > 0){
-                if (x.indexOf("\n") >= 0){
+        ) {
+            while (x.length() > 0) {
+                if (x.indexOf("\n") >= 0) {
                     pw.println(x.substring(0, x.indexOf("\n")));
                     x.delete(0, x.indexOf("\n") + 1);
                 } else {
@@ -66,15 +66,13 @@ public class Txt {
                     x.delete(0, x.length());
                 }
             }
-        } catch (FileNotFoundException fnfEx){
-            fnfEx.printStackTrace(System.err);
-            return false;
-        } catch (IOException ioEx){
+        } catch (IOException ioEx) {
             ioEx.printStackTrace(System.err);
             return false;
         }
         return true;
     }
+
     public void replaceGermanCharacters(int a) {
         StringBuilder sb = new StringBuilder(this.text);
 
@@ -100,6 +98,7 @@ public class Txt {
             index = sb.indexOf(target, index + replacement.length());
         }
     }
+
     public void lowerUpperCase(int a) {
         StringBuilder sb = new StringBuilder(this.text);
 
@@ -121,31 +120,8 @@ public class Txt {
 
         this.text = new StringBuilder(sb.toString());
     }
-    public char findMostFrequentLetter() {
-        int[] letterFrequencies = new int[26];
-        StringBuilder sb = new StringBuilder(this.text);
-
-        for (int i = 0; i < sb.length(); i++) {
-            char c = sb.charAt(i);
-            if (Character.isLetter(c)) {
-                int index = c - 'a';
-                letterFrequencies[index]++;
-            }
-        }
-
-        int maxFrequency = 0;
-        char mostFrequentLetter = 'a';
-
-        for (int i = 0; i < letterFrequencies.length; i++) {
-            if (letterFrequencies[i] > maxFrequency) {
-                maxFrequency = letterFrequencies[i];
-                mostFrequentLetter = (char) ('a' + i);
-            }
-        }
-
-        return mostFrequentLetter;
-    }
 }
+
 
 
 
